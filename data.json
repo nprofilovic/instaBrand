@@ -1,0 +1,28 @@
+[
+    {
+      
+      "name": "Product 1",
+      "link": "www.product.com",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSY4v88-wXzFFurZdd7WTB_3a6tLfJnPR4e2ldZ8hNGkdQIpCG2",
+      "color":"White",
+      "type":"Type",
+      "face":"front",
+      "pallete":"Big Pallete",
+      "about":"This section only applies to projects made with react-native init or to those made with Create React Native App which have since ejected.For more information about ejecting, please see the guide on the Create React Native App repository.",
+      "uid": 1,
+      "url":" "
+  },
+  {
+    
+      "name": "Product 2",
+      "link": "www.product.com",
+      "image": "http://geekycentral.com/wp-content/uploads/2017/09/react-native.png",
+      "color":"Black",
+      "type":"Type 2",
+      "face":"front 2",
+      "pallete":"Big Pallete 2",
+      "about":"This section only applies to projects made with react-native init or to those made with Create React Native App which have since ejected.For more information about ejecting, please see the guide on the Create React Native App repository.",
+      "uid": 1,
+      "url":" "
+    }
+]

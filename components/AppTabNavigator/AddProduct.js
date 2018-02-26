@@ -6,6 +6,8 @@ import ImagePicker from 'react-native-image-picker';
 import * as firebase from "firebase";
 import Firebase from '../../server/firebase';
 
+
+
 export default class AddProduct extends Component {
     static navigationOptions = {
       tabBarIcon: ({ tintColor }) => ( <Icon name="ios-add-circle" style={{color: tintColor}} />
@@ -13,20 +15,9 @@ export default class AddProduct extends Component {
     }
     constructor(props){
       super(props);
-      Firebase.init()
+      
       this.state = {
-        imagePath: '',
-        imageHeight: '',
-        imageWidth: '',
-        name:'',
-        link:'',
-        color:'',
-        type:'',
-        face:'',
-        pallete:'',
-        about:'',
-        uid:'',
-        url:'',
+        data:[]
       
       }
 
@@ -70,25 +61,12 @@ export default class AddProduct extends Component {
     }
 
     saveForm(){
+
+      this.props.navigation.navigate('CardComponent');
       console.log('====================================');
       console.log("Save button");
       console.log('====================================');
-      if(this.state.uid){
-        try {
-          this.state.name ? Helper.setProductName(this.state.uid, this.state.name) : null
-          this.state.link ? Helper.setProductLink(this.state.uid, this.state.link) : null
-          this.state.color ? Helper.setProductColor(this.state.uid, this.state.color) : null
-          this.state.type ? Helper.setProductType(this.state.uid, this.state.type) : null
-          this.state.face ? Helper.setProductFace(this.state.uid, this.state.face) : null
-          this.state.pallete ? Helper.setProductPallete(this.state.uid, this.state.pallete) : null
-          this.state.about ? Helper.setProductAbout(this.state.uid, this.state.about) : null
-          this.state.url ? Helper.setProductUrl(this.state.uid, this.state.url) : null
-          this.props.navigation.navigate('HomeTab');
-
-        } catch(error){
-          console.log(error);
-        }
-      }
+      
     }
     render(){
         return(
