@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, FlatList } from 'react-native';
-import { Icon, Card, CardItem, Thumbnail, Body, Left, Right, Button } from 'native-base';
-import firebase from "firebase";
+import { View, Text, StyleSheet, Image, FlatList, ListView } from 'react-native';
+import { Icon, Card, CardItem, Thumbnail, Body, Left, Right, Button, Item, Input } from 'native-base';
+import * as firebase from "firebase";
 import {base} from '../server/firebase';
 
 const products = [
@@ -32,7 +32,19 @@ const products = [
   url:'',
 }
 ]
+const firebaseConfig = {
+  // ADD YOUR FIREBASE CREDENTIALS
+    apiKey: "AIzaSyBHd5rL293B1TQ10tH4z4xDiEqAvBudHYM",
+    authDomain: "instabrand-252aa.firebaseapp.com",
+    databaseURL: "https://instabrand-252aa.firebaseio.com",
+    projectId: "instabrand-252aa",
+    storageBucket: "instabrand-252aa.appspot.com",
+    messagingSenderId: "67091235208"
+};
 
+
+
+var data = []
 export default class CardComponent extends Component {
     static navigationOptions = {
       headerLeft: <Icon name="ios-camera-outline" style={{paddingLeft: 10}} />,
@@ -42,34 +54,55 @@ export default class CardComponent extends Component {
     constructor(props){
       super(props);
       
+      this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
+
       this.state = {
-          products
+          data: [],
+          listViewData: data,
+          newContact: ""
       }
     }
 
     componentWillMount(){
-      this.ref = base.syncState('data', {
-        context: this,
-        state: 'data'
+      this.getData();
+    }
+
+    getData(){
+      var query = firebase.database().ref('product').orderByChild('date');
+      
+      query.on('value', (snapshot) => 
+      {
+          datas = [];   
+          snapshot.forEach((child) => 
+          {
+              data.push(child.val());
+          });
+
+          this.setState({ data: datas });
       });
     }
+
+    addRow(data) {
+
+      var key = firebase.database().ref('/product').push().key
+      firebase.database().ref('/product').child(key).set({ name: data })
+    }
+
     render(){
-      console.log('====================================');
-      console.log(this.state.products);
-      console.log('====================================');
+      var dateFormat = require('dateformat');
         return(
             <View>
-              <FlatList 
-                data={this.state.products}
-                keyExtractor={item => item.uid}
-                renderItem = {({item}) => 
+              <ListView 
+                dataSource={this.ds.cloneWithRows(this.state.listViewData)}
+                enableEmptySections
+                renderRow = {item => 
                 <Card>
                   <CardItem>
                     <Left>
                       <Thumbnail source={item.image} />
                       <Body>
                         <Text>{item.name}</Text>
-                        <Text note>Feb 25, 2018</Text>
+                        <Text note>{dateFormat(item.date, "ddd, mmmm dS, yyyy")}</Text>
                       </Body>
                     </Left>
                   </CardItem>
@@ -119,6 +152,7 @@ export default class CardComponent extends Component {
                       </Text>
                     </Body>
                   </CardItem>
+                  
                 </Card>
                 }
               />

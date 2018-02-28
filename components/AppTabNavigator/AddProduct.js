@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
-import { Icon, Container, Header, Content, Form, Item, Input, Label } from 'native-base';
+import { Icon, Container, Header, Content, Form, Item, Input, Label,  } from 'native-base';
 import Helper from '../../server/helper';
 import ImagePicker from 'react-native-image-picker';
 import * as firebase from "firebase";
-import Firebase from '../../server/firebase';
+import {base} from '../../server/firebase';
 
 
+var data = []
 
+const date = Date.now();
 export default class AddProduct extends Component {
     static navigationOptions = {
       tabBarIcon: ({ tintColor }) => ( <Icon name="ios-add-circle" style={{color: tintColor}} />
@@ -17,23 +19,53 @@ export default class AddProduct extends Component {
       super(props);
       
       this.state = {
-        data:[]
+        listViewData: data,
+        newProduct:'',
+        date: date,
+        name:'',
+        link:'',
+        image: '',
+        color:'',
+        type:'',
+        face:'',
+        pallete:'',
+        about:'',
+        uid: '',
+        url:'',
       
       }
-
+      this.productRef = this.getRef().child('product')
      
     }
 
-    async componentWillMount () {
-      try {
-          let name = await firebase.auth();
-          this.setState({
-              uid: name.uid
-          })
-      } catch(error){
-          console.log(error)
-      }
-  }
+    getRef(){
+      return firebase.database().ref();
+    }
+    componentWillMount(){
+      this.getProduct(this.productRef);
+    }
+
+    getProduct(productRef){
+      productRef.on('value', (snap) => {
+        let products = [];
+        snap.forEach((child) => {
+          products.push({
+            name: child.val().name,
+            date: child.val().date,
+            _key: child.key,
+            link: child.val().link,
+            color: child.val().color,
+            type: child.val().type,
+            face: child.val().face,
+            pallete: child.val().pallete,
+            about: child.val().about,
+            url: child.val().url,
+          });
+        });
+      });
+
+    
+    }
 
     openImagePicker(){
       const options = {
@@ -62,19 +94,35 @@ export default class AddProduct extends Component {
 
     saveForm(){
 
-      this.props.navigation.navigate('CardComponent');
-      console.log('====================================');
-      console.log("Save button");
-      console.log('====================================');
+      var key = firebase.database().ref('/product').push().key
+      firebase.database().ref('/product').child(key).set({newProduct: data})
       
     }
+
+    addRow(data) {
+     
+
+     this.productRef.push({
+       name: this.state.name, 
+       link: this.state.link,
+       color: this.state.color,
+       type: this.state.type,
+       face: this.state.face,
+       pallete: this.state.pallete,
+       about: this.state.about,
+       url: this.state.url,  
+       date: this.state.date 
+    })
+      this.props.navigation.navigate('HomeTab');
+    }
     render(){
+      
         return(
           <Content>
             <Form>
-              <Item floatingLabel>
-                <Label>Product name</Label>
-                <Input value={this.state.name} onChangeText={(name) => this.setState({name})}/>
+              <Item floatingLabel >
+                <Label>Product Name</Label>
+                <Input value={this.state.name}  onChangeText={(name) => this.setState({name})}/>
               </Item>
               <Item floatingLabel >
                 <Label>Purchase link</Label>
@@ -100,8 +148,9 @@ export default class AddProduct extends Component {
               <Label>About the product</Label>
               <Input value={this.state.about} onChangeText={(about) => this.setState({about})}  />
             </Item>
+             
             </Form>
-            <Button style={styles.button} onPress={this.saveForm.bind(this)} title="Save" color="#841584" />
+            <Button style={styles.button} onPress={() => this.addRow(this.state.name, this.state.link)} title="Save" color="#841584" ><Text>Save</Text></Button>
               
             
         </Content>
