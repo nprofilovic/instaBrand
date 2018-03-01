@@ -32,15 +32,7 @@ const products = [
   url:'',
 }
 ]
-const firebaseConfig = {
-  // ADD YOUR FIREBASE CREDENTIALS
-    apiKey: "AIzaSyBHd5rL293B1TQ10tH4z4xDiEqAvBudHYM",
-    authDomain: "instabrand-252aa.firebaseapp.com",
-    databaseURL: "https://instabrand-252aa.firebaseio.com",
-    projectId: "instabrand-252aa",
-    storageBucket: "instabrand-252aa.appspot.com",
-    messagingSenderId: "67091235208"
-};
+
 
 
 
@@ -59,34 +51,48 @@ export default class CardComponent extends Component {
       this.state = {
           data: [],
           listViewData: data,
-          newContact: ""
+          loading: false,
+          refreshing: false,
       }
     }
 
-    componentWillMount(){
+    componentDidMount(){
       this.getData();
     }
 
+  
     getData(){
-      var query = firebase.database().ref('product').orderByChild('date');
+      var that = this
+
+      firebase.database().ref('/product').orderByChild('date').on('child_added', function (data) {
+  
+        var newData = [...that.state.listViewData]
+        newData.push(data)
+        that.setState({ listViewData: newData })
+  
+      })
+    }
+
+    async deleteRow(secId, rowId, rowMap, data) {
+
+      await firebase.database().ref('product/' + data.key).set(null)
+  
       
-      query.on('value', (snapshot) => 
-      {
-          datas = [];   
-          snapshot.forEach((child) => 
-          {
-              data.push(child.val());
-          });
-
-          this.setState({ data: datas });
-      });
+      var newData = [...this.state.listViewData];
+      newData.splice(rowId, 1)
+      this.setState({ listViewData: newData });
+  
     }
-
-    addRow(data) {
-
-      var key = firebase.database().ref('/product').push().key
-      firebase.database().ref('/product').child(key).set({ name: data })
-    }
+    handleRefresh = () => {
+      this.setState(
+        {
+          refreshing: true
+        },
+        () => {
+          this.getData();
+        }
+      );
+    };
 
     render(){
       var dateFormat = require('dateformat');
@@ -94,20 +100,21 @@ export default class CardComponent extends Component {
             <View>
               <ListView 
                 dataSource={this.ds.cloneWithRows(this.state.listViewData)}
+                onRefresh={this.handleRefresh}
                 enableEmptySections
-                renderRow = {item => 
+                renderRow = {(data, secId, rowId, rowMap ) => 
                 <Card>
                   <CardItem>
                     <Left>
-                      <Thumbnail source={item.image} />
+                      <Thumbnail source={{uri: 'http://ichorconstruction.com/wp-content/uploads/2015/06/avatar-187x187.png'}} />
                       <Body>
-                        <Text>{item.name}</Text>
-                        <Text note>{dateFormat(item.date, "ddd, mmmm dS, yyyy")}</Text>
+                        <Text style={{fontWeight: "900" }}>{data.val().name}</Text>
+                        <Text note>{dateFormat(data.val().date, "dS mmm, yyyy")}</Text>
                       </Body>
                     </Left>
                   </CardItem>
                   <CardItem cardBody>
-                    <Image source={item.image} style={{height: 200, width: null, flex: 1}}/>
+                    <Image source={{uri: data.val().image}} style={{height: 350, width: null, flex: 1}}/>
                   </CardItem>
                   <CardItem style={{height: 45}}>
                     <Left>
@@ -126,29 +133,36 @@ export default class CardComponent extends Component {
                         <Icon active name="ios-send-outline" style={{color: 'black'}} />
                       </Button>
                     </Left>
-                  
+                    <Body></Body>
+                    <Right>
+                    <Button transparent onPress={() => this.deleteRow(secId, rowId, rowMap, data)}>
+                        <Icon active name="ios-trash-outline" style={{color: 'black'}} />
+                      
+                      </Button>
+                    </Right>
+
                   </CardItem>
                   <CardItem style={{height: 20}}>
-                   <Text><Text style={{fontWeight: "900" }}>Link: </Text>{item.link}</Text>
+                   <Text><Text style={{fontWeight: "900" }}>Link: </Text>{data.val().link}</Text>
                   </CardItem>
                   <CardItem style={{height: 20}}>
-                   <Text><Text style={{fontWeight: "900" }}>Color: </Text>{item.color}</Text>
+                   <Text><Text style={{fontWeight: "900" }}>Color: </Text>{data.val().color}</Text>
                   </CardItem>
                   <CardItem style={{height: 20}}>
-                   <Text><Text style={{fontWeight: "900" }}>Product Type: </Text>{item.type}</Text>
+                   <Text><Text style={{fontWeight: "900" }}>Product Type: </Text>{data.val().type}</Text>
                   </CardItem>
                   <CardItem style={{height: 20}}>
-                   <Text><Text style={{fontWeight: "900" }}>Face Part: </Text>{item.face}</Text>
+                   <Text><Text style={{fontWeight: "900" }}>Face Part: </Text>{data.val().face}</Text>
                   </CardItem>
                   <CardItem style={{height: 20}}>
-                   <Text><Text style={{fontWeight: "900" }}>Pallete: </Text>{item.pallete}</Text>
+                   <Text><Text style={{fontWeight: "900" }}>Pallete: </Text>{data.val().pallete}</Text>
                   </CardItem>
 
                   <CardItem>
                     <Body>
                       <Text>
-                      <Text style={{fontWeight: "900" }}>{item.name} </Text>
-                        {item.about}
+                      <Text style={{fontWeight: "900" }}>{data.val().name} </Text>
+                        {data.val().about}
                       </Text>
                     </Body>
                   </CardItem>
