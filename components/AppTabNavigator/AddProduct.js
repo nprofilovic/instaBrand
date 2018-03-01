@@ -19,6 +19,9 @@ export default class AddProduct extends Component {
       super(props);
       
       this.state = {
+        imagePath: '',
+        imageHeight: '',
+        imageWidth: '',
         listViewData: data,
         newProduct:'',
         date: date,
@@ -32,6 +35,7 @@ export default class AddProduct extends Component {
         about:'',
         uid: '',
         url:'',
+        image:'',
       
       }
       this.productRef = this.getRef().child('product')
@@ -60,6 +64,7 @@ export default class AddProduct extends Component {
             pallete: child.val().pallete,
             about: child.val().about,
             url: child.val().url,
+            image: child.val().image
           });
         });
       });
@@ -75,6 +80,7 @@ export default class AddProduct extends Component {
           path: 'images'
         }
       }
+      
       ImagePicker.showImagePicker(options, (response) => {
         if(response.didCancel){
           console.log('User cancel image picker');
@@ -91,14 +97,8 @@ export default class AddProduct extends Component {
         }
       })
     }
-
-    saveForm(){
-
-      var key = firebase.database().ref('/product').push().key
-      firebase.database().ref('/product').child(key).set({newProduct: data})
-      
-    }
-
+    
+    
     addRow(data) {
      
 
@@ -110,15 +110,20 @@ export default class AddProduct extends Component {
        face: this.state.face,
        pallete: this.state.pallete,
        about: this.state.about,
-       url: this.state.url,  
+       url: this.state.url, 
+       image: this.state.image, 
        date: this.state.date 
+
     })
+      this.addForm.reset();
       this.props.navigation.navigate('HomeTab');
+
     }
     render(){
       
         return(
           <Content>
+           
             <Form>
               <Item floatingLabel >
                 <Label>Product Name</Label>
@@ -127,6 +132,10 @@ export default class AddProduct extends Component {
               <Item floatingLabel >
                 <Label>Purchase link</Label>
                 <Input value={this.state.link} onChangeText={(link) => this.setState({link})} />
+              </Item>
+              <Item floatingLabel >
+                <Label>Image</Label>
+                <Input value={this.state.image} onChangeText={(image) => this.setState({image})} />
               </Item>
               <Item floatingLabel >
                 <Label>Color</Label>
@@ -150,7 +159,7 @@ export default class AddProduct extends Component {
             </Item>
              
             </Form>
-            <Button style={styles.button} onPress={() => this.addRow(this.state.name, this.state.link)} title="Save" color="#841584" ><Text>Save</Text></Button>
+            <Button style={styles.button} onPress={() => this.addRow(this.state.name, this.state.link).reset} title="Save" color="#841584" ><Text>Save</Text></Button>
               
             
         </Content>
